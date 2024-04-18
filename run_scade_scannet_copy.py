@@ -240,11 +240,11 @@ def train_step(step, model, device, dataset, batch, loss_fn, args, DEPTH_SCALES,
         space_carving_mask = space_carving_mask[select_coords[:, 0], select_coords[:, 1]]
     else:
         space_carving_mask = None
-    # if args.space_carving_weight>0. and step>args.warm_start:
-    #     space_carving_loss = compute_space_carving_loss(depth, target_h, is_joint=args.is_joint, norm_p=args.norm_p, threshold=args.space_carving_threshold, mask=space_carving_mask)
-    #     loss = loss + args.space_carving_weight * space_carving_loss
-    # else:
-    #     space_carving_loss = torch.mean(torch.zeros([target_h.shape[0]]).to(target_h.device))
+    if args.space_carving_weight>0. and step>args.warm_start:
+        space_carving_loss = compute_space_carving_loss(depth, target_h, is_joint=args.is_joint, norm_p=args.norm_p, threshold=args.space_carving_threshold, mask=space_carving_mask)
+        loss = loss + args.space_carving_weight * space_carving_loss
+    else:
+        space_carving_loss = torch.mean(torch.zeros([target_h.shape[0]]).to(target_h.device))
     model.scaler.scale(loss).backward()
     model.step(step)
     if args.scaler_min_scale > 0 and model.scaler.get_scale() < args.scaler_min_scale:
